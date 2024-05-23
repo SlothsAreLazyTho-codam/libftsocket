@@ -1,6 +1,6 @@
 #pragma once
 
-#include <IBaseSocket.hpp>
+#include <Socket.hpp>
 #include <TcpClient.hpp>
 #include <macros.h>
 
@@ -19,9 +19,9 @@
 	#undef POLL_TIMEOUT
 #endif
 
-#define POLL_TIMEOUT -1
+#define POLL_TIMEOUT 100
 
-class TcpServer : public IBaseSocket
+class TcpServer : public Socket
 {
 	private:
 		std::vector<struct pollfd>	_pollfds;
@@ -38,4 +38,7 @@ class TcpServer : public IBaseSocket
 
 		int		openup(const char *host, const char *port);
 		void	loop(void);
+
+	public:
+		void	*(*onMessage)(TcpClient *, const std::string& message);
 };

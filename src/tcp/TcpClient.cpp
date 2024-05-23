@@ -41,7 +41,7 @@ int TcpClient::connect(const char *host, const char *port)
 	if (this->isConnected())
 		return (1);
 
-	NOT_BELOW_ZERO(IBaseSocket::open(host, port, CLIENT));
+	NOT_BELOW_ZERO(Socket::open(host, port, CLIENT));
 
 	NOT_BELOW_ZERO(::connect(
 		this->fd.fd,
@@ -122,12 +122,12 @@ std::string TcpClient::readString()
 }
 
 
-const std::string	TcpClient::getBuffer()
+std::string TcpClient::getBuffer() const
 {
 	return (this->_buffer);
 }
 
-const int32_t		TcpClient::getBufferLength()
+int32_t TcpClient::getBufferLength() const
 {
 	return (this->_buffer.length());
 }

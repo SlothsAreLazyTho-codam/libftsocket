@@ -1,6 +1,6 @@
 #pragma once
 
-#include <IBaseSocket.hpp>
+#include <Socket.hpp>
 #include <macros.h>
 
 #include <iostream>
@@ -8,7 +8,7 @@
 #include <cstring>
 #include <stdbool.h>
 
-class TcpClient : public IBaseSocket
+class TcpClient : public Socket
 {
 	private:
 		std::string _buffer;
@@ -24,8 +24,8 @@ class TcpClient : public IBaseSocket
 		std::vector<char>	read();
 		std::string			readString();
 
-		const std::string	getBuffer();
-		const int32_t		getBufferLength();
+		std::string			getBuffer() const;
+		int32_t				getBufferLength() const;
 		void				resetBuffer();
 
 };

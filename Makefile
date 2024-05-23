@@ -6,7 +6,7 @@
 #    By: macbook <macbook@student.codam.nl>           +#+                      #
 #                                                    +#+                       #
 #    Created: 2024/04/18 03:23:25 by macbook       #+#    #+#                  #
-#    Updated: 2024/05/21 22:44:34 by macbook       ########   odam.nl          #
+#    Updated: 2024/05/23 19:44:23 by macbook       ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,7 +31,7 @@ BIN_FOLDER=./bin
 DEP_FOLDER=$(BIN_FOLDER)/deps
 
 # File structure
-FILES =	IBaseSocket \
+FILES =	Socket \
 		TcpClient \
 		TcpServer \
 		Utils

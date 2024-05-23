@@ -31,7 +31,7 @@
 #define SERVER 1
 #define CLIENT 2
 
-class IBaseSocket
+class Socket
 {
 	private:
 		struct addrinfo	_hints;
@@ -48,8 +48,8 @@ class IBaseSocket
 		
 		void setConnected(int open);
 	public:
-		IBaseSocket();
-		virtual ~IBaseSocket();
+		Socket();
+		virtual ~Socket();
 
 		void close(void);
 

@@ -21,7 +21,7 @@ void* connect_threaded_client(void *a)
 	return (nullptr);
 }
 
-int main()
+int maina()
 {
 	int			amount = 100;
 	pthread_t	thread_id[amount];
@@ -36,4 +36,14 @@ int main()
 	}
 
 	return (EXIT_SUCCESS);
+}
+
+int main()
+{
+	TcpClient _client;
+
+	if (_client.connect("127.0.0.1", "4242") < 0)
+		return (std::cout << "Cannot connect\n", 1);
+
+	_client.send("Hello World");
 }

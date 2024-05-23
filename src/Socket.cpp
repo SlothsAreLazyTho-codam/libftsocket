@@ -1,8 +1,7 @@
-#include "IBaseSocket.hpp"
-
+#include "Socket.hpp"
 #include "macros.h"
 
-IBaseSocket::IBaseSocket():
+Socket::Socket():
 	addrinfo(nullptr),
 	_open(0)
 {
@@ -17,7 +16,7 @@ IBaseSocket::IBaseSocket():
 	LOG_DEBUG("Base socket constructed");
 }
 
-IBaseSocket::~IBaseSocket()
+Socket::~Socket()
 {
 	this->setConnected(false);
 	if (this->addrinfo)
@@ -27,7 +26,7 @@ IBaseSocket::~IBaseSocket()
 	LOG_DEBUG("Base socket deconstructed");
 }
 
-int IBaseSocket::open(const char *addr, const char *port, int type)
+int Socket::open(const char *addr, const char *port, int type)
 {
 	if (this->fd.fd > STDERR_FILENO)
 		return (this->fd.fd);
@@ -51,51 +50,51 @@ int IBaseSocket::open(const char *addr, const char *port, int type)
 	return (this->fd.fd);
 }
 
-void IBaseSocket::close(void)
+void Socket::close(void)
 {
 	if (this->isClosed())
 		return;
 	this->setConnected(false);
 }
 
-void IBaseSocket::setConnected(int open)
+void Socket::setConnected(int open)
 {
 	if (open != 0 && open != 1)
 		return;
 	this->_open = open;
 }
 
-int IBaseSocket::isConnected(void) const
+int Socket::isConnected(void) const
 {
 	return (this->_open);
 }
 
-int IBaseSocket::isClosed(void) const
+int Socket::isClosed(void) const
 {
 	return (!this->_open);
 }
 
-int IBaseSocket::getSocket(void) const
+int Socket::getSocket(void) const
 {
 	return (this->fd.fd);
 }
 
-struct addrinfo* IBaseSocket::getAddress(void) const
+struct addrinfo* Socket::getAddress(void) const
 {
 	return (this->addrinfo);
 }
 
-struct pollfd IBaseSocket::getFileDescriptor() const
+struct pollfd Socket::getFileDescriptor() const
 {
 	return (this->fd);
 }
 
-const std::string& IBaseSocket::getHost() const
+const std::string& Socket::getHost() const
 {
 	return (this->_ip);
 }
 
-const std::string& IBaseSocket::getPort() const
+const std::string& Socket::getPort() const
 {
 	return (this->_port);
 }

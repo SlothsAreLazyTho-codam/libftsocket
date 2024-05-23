@@ -4,8 +4,7 @@
 #include <fstream>
 
 TcpServer::TcpServer() : _pollfds(0), _clients()
-{
-}
+{ }
 
 TcpServer::~TcpServer()
 {
@@ -35,8 +34,9 @@ std::string generate_http_response(const std::string body) {
 }
 
 std::string build_response() {
-    std::ifstream file("./index.html");
-    if (!file.is_open()) {
+    std::fstream file("./index.html");
+    
+	if (file.fail()) {
         return ("<html>No page found!</html>");
     }
 
@@ -52,7 +52,7 @@ int TcpServer::openup(const char *host, const char *port)
 	if (this->isConnected())
 		return (1);
 
-	NOT_BELOW_ZERO(IBaseSocket::open(host, port, SERVER));
+	NOT_BELOW_ZERO(Socket::open(host, port, SERVER));
 
 	NOT_BELOW_ZERO(setsockopt(this->fd.fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)));
 
@@ -80,7 +80,7 @@ void TcpServer::loop(void)
 		{
 			throw std::runtime_error("poll() failed");
 		}
-		for (int i = 0; i < this->_pollfds.size(); i++)
+		for (size_t i = 0; i < this->_pollfds.size(); i++)
 		{
 			pollfd target = this->_pollfds[i];
 			
@@ -119,6 +119,7 @@ void TcpServer::loop(void)
 
 inline void TcpServer::handleClientEvent(TcpClient *client)
 {
+	std::string delimiter = "\n";
 	try
 	{
 		std::string buffer = client->readString();
@@ -127,6 +128,14 @@ inline void TcpServer::handleClientEvent(TcpClient *client)
 		{
 			removeClientFromList(client->getSocket());
 			return;
+		}
+
+		std::cout << buffer;
+		size_t pos = 0;
+		while ((pos = buffer.find(delimiter)) != std::string::npos)
+		{
+			this->onMessage(client, buffer.substr(0, pos));
+			buffer.erase(0, pos + delimiter.length());
 		}
 
 		client->send(build_response());
