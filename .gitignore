@@ -6,6 +6,7 @@
 **/*.o
 **/*.out
 **/*.d
+**/*.a
 
 ./tests/client
 ./tests/server
