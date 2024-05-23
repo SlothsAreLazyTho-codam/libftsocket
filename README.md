@@ -1,6 +1,6 @@
 # Only supports TCP
 
-## todos:
-[] Adding Web client
-[] Adding events to handle messages
-[x] Order a pizza
+## Implementing in the next update:
+ - Adding Web client
+ - Adding events to handle messages
+ - Order a pizza
