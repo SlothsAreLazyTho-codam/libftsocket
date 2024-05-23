@@ -1,0 +1,11 @@
+./.vscode
+./bin
+
+# General files to ignore EVERYWHERE /!\
+**/*.dSYM
+**/*.o
+**/*.out
+**/*.d
+
+./tests/client
+./tests/server
