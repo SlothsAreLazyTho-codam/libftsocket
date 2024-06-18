@@ -21,6 +21,8 @@
 
 #define POLL_TIMEOUT 100
 
+typedef	void (*messagefunc_t)(TcpClient *, const std::string &);
+
 class TcpServer : public Socket
 {
 	private:
@@ -39,6 +41,8 @@ class TcpServer : public Socket
 		int		openup(const char *host, const char *port);
 		void	loop(void);
 
-	public:
-		void	*(*onMessage)(TcpClient *, const std::string& message);
+		void	on_message_hook(messagefunc_t func);
+
+	private:
+		messagefunc_t	onMessage;
 };

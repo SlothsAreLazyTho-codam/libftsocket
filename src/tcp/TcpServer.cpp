@@ -130,15 +130,12 @@ inline void TcpServer::handleClientEvent(TcpClient *client)
 			return;
 		}
 
-		std::cout << buffer;
 		size_t pos = 0;
 		while ((pos = buffer.find(delimiter)) != std::string::npos)
 		{
 			this->onMessage(client, buffer.substr(0, pos));
 			buffer.erase(0, pos + delimiter.length());
 		}
-
-		client->send(build_response());
 	}
 	catch (std::invalid_argument &ex)
 	{
@@ -154,7 +151,6 @@ int TcpServer::handleClientConnection()
 	socklen_t client_addrlen = sizeof(client_addrin);
 	int32_t clientFd = accept(this->fd.fd, (sockaddr *)&client_addrin, &client_addrlen);
 
-	// set the fd to non blocking
 	NOT_BELOW_ZERO(clientFd);
 	NOT_BELOW_ZERO(fcntl(clientFd, F_SETFL, O_NONBLOCK));
 
@@ -187,4 +183,9 @@ int TcpServer::removeClientFromList(int fd)
 	LOG_DEBUG(client->getHost() << " left the server");
 	delete client;
 	return (1);
+}
+
+void	TcpServer::on_message_hook(messagefunc_t func)
+{
+	this->onMessage = func;
 }
