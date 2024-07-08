@@ -36,6 +36,16 @@ TcpClient &TcpClient::operator=(const TcpClient &other)
 	return (*this);
 }
 
+/**
+ * @brief Connects the TcpClient to a specified host and port.
+ *
+ * This function establishes a TCP connection to the specified host and port.
+ * If the TcpClient is already connected, the function returns immediately.
+ *
+ * @param host The host to connect to.
+ * @param port The port to connect to.
+ * @return Returns 1 if the connection is successful, otherwise returns an error code.
+ */
 int TcpClient::connect(const char *host, const char *port)
 {
 	if (this->isConnected())
@@ -52,6 +62,7 @@ int TcpClient::connect(const char *host, const char *port)
 	return (1);
 }
 
+//TODO Implement sending feature if TcpClient is implemented manually,
 void TcpClient::send(std::string buff)
 {
 	if (this->isClosed())
@@ -63,8 +74,20 @@ void TcpClient::send(std::string buff)
 	this->_buffer += buff;
 }
 
-/// @brief Read bytes from socket
-/// @return Byte array in a char pointer.
+
+/**
+ * @brief Reads data from the TCP client socket.
+ *
+ * This function reads data from the TCP client socket and returns it as a vector of characters.
+ * It reads data in chunks of 1024 bytes until there is no more data to read or an error occurs.
+ * If the socket is closed, an exception of type std::invalid_argument is thrown.
+ * If the connection is reset by the peer, an exception of type std::invalid_argument is thrown.
+ * If the recv() function fails, an exception of type std::invalid_argument is thrown.
+ *
+ * @return A vector of characters containing the data read from the socket.
+ *
+ * @throws std::invalid_argument If the socket is closed, the connection is reset by the peer, or the recv() function fails.
+ */
 std::vector<char> TcpClient::read()
 {
 	std::vector<char>	response(0);
@@ -102,6 +125,12 @@ std::vector<char> TcpClient::read()
 	return (response);
 }
 
+/**
+ * Reads a string from the TCP connection.
+ * 
+ * @return The string read from the TCP connection.
+ * @throws std::invalid_argument if no data was received by the peer.
+ */
 std::string TcpClient::readString()
 {
 	try {

@@ -2,10 +2,19 @@
 #include "Utils.hpp"
 
 #include <fstream>
+#
 
+/**
+ * @brief Default constructor for the TcpServer class.
+ */
 TcpServer::TcpServer() : _pollfds(0), _clients()
 { }
 
+/**
+ * @brief Destructor for the TcpServer class.
+ * 
+ * This destructor clears the pollfds and clients vectors.
+ */
 TcpServer::~TcpServer()
 {
 	this->_pollfds.clear();
@@ -17,34 +26,27 @@ inline void print_socket_information(TcpServer &server)
 	std::cout << std::endl;
 	std::cout << "\t" << BOLD_MAGENTA << "▲ " << "FTSocket " << FTSOCK_VERSION << RESET << std::endl;
 	std::cout << "\t" << BOLD_MAGENTA << "↳ " << RESET << "Local: " << server.getHost() << ":" << server.getPort() << std::endl;
-#ifdef DEBUG
 	std::cout << "\t" << BOLD_MAGENTA << "↳ " << RESET << "Debug Mode: enabled" << std::endl;
-#endif
 	std::cout << std::endl;
 }
 
-std::string generate_http_response(const std::string body) {
-    std::ostringstream response_stream;
-    response_stream << "HTTP/1.1 200 OK\r\n";
-    response_stream << "Content-Type: text/html\r\n";
-    response_stream << "Content-Length: " << body.length() << "\r\n";
-    response_stream << "\r\n";
-    response_stream << body;
-    return response_stream.str();
-}
-
-std::string build_response() {
-    std::fstream file("./index.html");
-    
-	if (file.fail()) {
-        return ("<html>No page found!</html>");
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return generate_http_response(buffer.str());
-}
-
+/**
+ * @brief Opens up a TCP server connection.
+ *
+ * This function opens a TCP server connection on the specified host and port.
+ * It performs the following steps:
+ * 1. Checks if the server is already connected. If yes, returns 1.
+ * 2. Opens a socket using the Socket::open function.
+ * 3. Sets the SO_REUSEADDR option on the socket.
+ * 4. Binds the socket to the specified address.
+ * 5. Starts listening for incoming connections.
+ * 6. Adds the socket to the list of pollfds.
+ * 7. Sets the connected flag to true.
+ *
+ * @param host The host to bind the server to.
+ * @param port The port to bind the server to.
+ * @return Returns 1 on success, -1 on failure.
+ */
 int TcpServer::openup(const char *host, const char *port)
 {
 	int opt = 1;
@@ -52,23 +54,39 @@ int TcpServer::openup(const char *host, const char *port)
 	if (this->isConnected())
 		return (1);
 
-	NOT_BELOW_ZERO(Socket::open(host, port, SERVER));
+	if (Socket::open(host, port, SERVER) < 0)
+		return (-1);
 
-	NOT_BELOW_ZERO(setsockopt(this->fd.fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)));
+	if (setsockopt(this->fd.fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+		return (-1);
 
-	NOT_BELOW_ZERO(bind(
-		this->getSocket(),
-		this->getAddress()->ai_addr,
-		this->getAddress()->ai_addrlen));
+	if (bind(this->getSocket(), this->getAddress()->ai_addr, this->getAddress()->ai_addrlen) < 0)
+		return (-1); 
 
-	NOT_BELOW_ZERO(listen(this->fd.fd, 420));
+	if (listen(this->fd.fd, 5) < 0)
+		return (-1);
 
 	this->_pollfds.push_back(this->fd);
 	this->setConnected(true);
+
+#ifdef DEBUG
 	print_socket_information(*this);
+#else
+	std::cout << "(!) Ready to accept connections";
+#endif
+
 	return (1);
 }
 
+/**
+ * @brief Enters the main loop of the TCP server, continuously accepting connections and handling events.
+ *
+ * This function starts the main loop of the TCP server. It continuously checks for events on the registered file descriptors
+ * using the `poll` function. It handles various events such as client disconnections, errors, incoming data, and outgoing data.
+ * The loop continues until the server is no longer running.
+ *
+ * @throws std::runtime_error if the `poll` function fails.
+ */
 void TcpServer::loop(void)
 {
 	std::cout << BOLD_MAGENTA << "Ready to accept connections." << RESET << std::endl;
@@ -144,8 +162,7 @@ inline void TcpServer::handleClientEvent(TcpClient *client)
 	}
 }
 
-// Clean this mess up!
-int TcpServer::handleClientConnection()
+inline int TcpServer::handleClientConnection()
 {
 	sockaddr_in client_addrin;
 	socklen_t client_addrlen = sizeof(client_addrin);

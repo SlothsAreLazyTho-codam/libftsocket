@@ -1,6 +1,17 @@
 #include "Socket.hpp"
 #include "macros.h"
 
+/**
+ * @brief Default constructor for the Socket class.
+ * 
+ * This constructor initializes the Socket object with default values.
+ * It sets the file descriptor to -1, the events to POLLIN, and the revents to 0.
+ * It also sets the ai_flags to AI_ALL, ai_family to AF_INET, and ai_socktype to SOCK_STREAM.
+ * 
+ * @note This constructor does not create a socket connection.
+ * 
+ * @see Socket
+ */
 Socket::Socket():
 	addrinfo(nullptr),
 	_open(0)
@@ -16,6 +27,13 @@ Socket::Socket():
 	LOG_DEBUG("Base socket constructed");
 }
 
+/**
+ * @brief Destructor for the Socket class.
+ * 
+ * This destructor is responsible for cleaning up the resources used by the Socket object.
+ * It sets the connection status to false, frees the addrinfo structure if it exists, and closes the file descriptor if it is valid.
+ * Additionally, it logs a debug message indicating that the base socket has been deconstructed.
+ */
 Socket::~Socket()
 {
 	this->setConnected(false);
@@ -26,6 +44,14 @@ Socket::~Socket()
 	LOG_DEBUG("Base socket deconstructed");
 }
 
+/**
+ * Opens a socket connection.
+ *
+ * @param addr The address to connect to.
+ * @param port The port to connect to.
+ * @param type The type of socket (SERVER or CLIENT).
+ * @return The file descriptor of the opened socket.
+ */
 int Socket::open(const char *addr, const char *port, int type)
 {
 	if (this->fd.fd > STDERR_FILENO)
@@ -50,6 +76,12 @@ int Socket::open(const char *addr, const char *port, int type)
 	return (this->fd.fd);
 }
 
+/**
+ * @brief Closes the socket connection.
+ * 
+ * This function closes the socket connection if it is not already closed.
+ * It sets the connected flag to false.
+ */
 void Socket::close(void)
 {
 	if (this->isClosed())
