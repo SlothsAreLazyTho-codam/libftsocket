@@ -133,7 +133,7 @@ inline void TcpServer::handleClientEvent(TcpClient *client)
 		size_t pos = 0;
 		while ((pos = buffer.find(delimiter)) != std::string::npos)
 		{
-			this->onMessage(client, buffer.substr(0, pos));
+			this->m_onMessage(client, buffer.substr(0, pos));
 			buffer.erase(0, pos + delimiter.length());
 		}
 	}
@@ -162,6 +162,7 @@ int TcpServer::handleClientConnection()
 		std::cout << BOLD_MAGENTA << "(" << RESET << this->_pollfds.size() - 1 << BOLD_MAGENTA << ") " << \
 			client->getHost() << RESET << " joined the server" << std::endl;
 	}
+	this->m_onHanshake(client, "no_data_provided_yet!"); //TODO Wait for the first message from the user.
 	return (1);
 }
 
@@ -187,5 +188,10 @@ int TcpServer::removeClientFromList(int fd)
 
 void	TcpServer::on_message_hook(messagefunc_t func)
 {
-	this->onMessage = func;
+	this->m_onMessage = func;
+}
+
+void	TcpServer::on_handshake_hook(handshakefunc_t func)
+{
+	this->m_onHanshake = func;
 }

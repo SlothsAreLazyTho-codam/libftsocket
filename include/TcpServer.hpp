@@ -21,6 +21,7 @@
 
 #define POLL_TIMEOUT 100
 
+typedef	void (*handshakefunc_t)(TcpClient *, const std::string &);
 typedef	void (*messagefunc_t)(TcpClient *, const std::string &);
 
 class TcpServer : public Socket
@@ -41,8 +42,10 @@ class TcpServer : public Socket
 		int		openup(const char *host, const char *port);
 		void	loop(void);
 
+		void	on_handshake_hook(handshakefunc_t func);
 		void	on_message_hook(messagefunc_t func);
 
 	private:
-		messagefunc_t	onMessage;
+		handshakefunc_t	m_onHanshake;
+		messagefunc_t	m_onMessage;
 };
