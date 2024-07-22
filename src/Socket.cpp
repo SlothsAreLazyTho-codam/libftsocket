@@ -101,27 +101,27 @@ void Socket::setConnected(int open)
 	this->_open = open;
 }
 
-int Socket::isConnected(void) const
+int Socket::isConnected(void)
 {
 	return (this->_open);
 }
 
-int Socket::isClosed(void) const
+int Socket::isClosed(void)
 {
 	return (!this->_open);
 }
 
-int Socket::getSocket(void) const
+int Socket::getSocket(void)
 {
 	return (this->fd.fd);
 }
 
-struct addrinfo* Socket::getAddress(void) const
+struct addrinfo* Socket::getAddress(void)
 {
 	return (this->addrinfo);
 }
 
-struct pollfd Socket::getFileDescriptor() const
+struct pollfd Socket::getFileDescriptor()
 {
 	return (this->fd);
 }

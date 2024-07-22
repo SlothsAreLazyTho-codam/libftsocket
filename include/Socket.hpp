@@ -53,13 +53,13 @@ class Socket
 
 		void close(void);
 
-		int isConnected(void) const;
-		int isClosed(void) const;
-		int getSocket(void) const;
-
 		const std::string& getHost() const;
 		const std::string& getPort() const;
 
-		struct addrinfo *getAddress(void) const;
-		struct pollfd	getFileDescriptor() const;
+		int isConnected(void);
+		int isClosed(void);
+		int getSocket(void);
+
+		struct addrinfo *getAddress(void);
+		struct pollfd	getFileDescriptor();
 };
