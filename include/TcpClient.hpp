@@ -17,6 +17,7 @@ class TcpClient : public Socket
 		TcpClient();
 		TcpClient(int fd, sockaddr_in addr);
 		virtual ~TcpClient();
+		TcpClient(const TcpClient &client);
 		TcpClient &operator=(const TcpClient &other);
 
 		int					connect(const char *host, const char *port);

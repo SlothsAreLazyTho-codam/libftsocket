@@ -24,6 +24,11 @@ TcpClient::~TcpClient()
 	this->_buffer.clear();
 }
 
+TcpClient::TcpClient(const TcpClient &other)
+{
+	*this = other;
+}
+
 TcpClient &TcpClient::operator=(const TcpClient &other)
 {
 	this->fd.fd = other.fd.fd;

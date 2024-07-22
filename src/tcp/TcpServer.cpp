@@ -149,7 +149,7 @@ inline void TcpServer::handleClientEvent(TcpClient *client)
 		size_t pos = 0;
 		while ((pos = buffer.find(delimiter)) != std::string::npos)
 		{
-			this->m_onMessage(client, buffer.substr(0, pos));
+			this->onMessage(client, buffer.substr(0, pos));
 			buffer.erase(0, pos + delimiter.length());
 		}
 	}
@@ -180,7 +180,7 @@ inline int TcpServer::handleClientConnection()
 		std::cout << BOLD_MAGENTA << "(" << RESET << this->_pollfds.size() - 1 << BOLD_MAGENTA << ") " << \
 			client->getHost() << RESET << " joined the server" << std::endl;
 	}
-	this->m_onHanshake(client);
+	this->onHandshake(client);
 	return (1);
 }
 
@@ -199,10 +199,14 @@ int TcpServer::removeClientFromList(int fd)
 	this->_clients.erase(fd);
 	LOG_DEBUG(client->getHost() << " left the server");
 	delete client;
-	this->m_onDisconnect(fd);
+	this->onDisconnect(fd);
 	return (1);
 }
 
-void	TcpServer::setHandshakeHook(handshakefunc_t func) { this->m_onHanshake = func; }
-void	TcpServer::setMessageHook(messagefunc_t func) { this->m_onMessage = func; }
-void	TcpServer::setDisconnectHook(disconnectfunc_t func) { this->m_onDisconnect = func; }
+//void	TcpServer::setHandshakeHook(handshakefunc_t func) { this->m_onHanshake = func; }
+//void	TcpServer::setMessageHook(messagefunc_t func) { this->m_onMessage = func; }
+//void	TcpServer::setDisconnectHook(disconnectfunc_t func) { this->m_onDisconnect = func; }
+
+void TcpServer::onHandshake(TcpClient *a) {(void) a;}
+void TcpServer::onMessage(TcpClient *a, const std::string &b) { (void) a; (void) b;}
+void TcpServer::onDisconnect(int a) { (void) a;}
