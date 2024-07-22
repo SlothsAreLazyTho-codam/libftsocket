@@ -6,7 +6,7 @@
 /**
  * @brief Default constructor for the TcpServer class.
  */
-TcpServer::TcpServer() : _pollfds(0), _clients(0)
+TcpServer::TcpServer() : _pollfds(0), _clients()
 { }
 
 /**

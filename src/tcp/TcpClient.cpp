@@ -51,12 +51,13 @@ int TcpClient::connect(const char *host, const char *port)
 	if (this->isConnected())
 		return (1);
 
-	NOT_BELOW_ZERO(Socket::open(host, port, CLIENT));
+	if (Socket::open(host, port, CLIENT) < 0)
+		return (-1);
 
-	NOT_BELOW_ZERO(::connect(
-		this->fd.fd,
-		this->addrinfo->ai_addr,
-		this->addrinfo->ai_addrlen));
+	if (::connect(	this->fd.fd,
+					this->addrinfo->ai_addr,
+					this->addrinfo->ai_addrlen) < 0)
+		return (-1);
 
 	this->setConnected(true);
 	return (1);

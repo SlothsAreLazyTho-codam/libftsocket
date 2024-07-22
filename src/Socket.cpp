@@ -60,7 +60,8 @@ int Socket::open(const char *addr, const char *port, int type)
 	this->_ip = addr;
 	this->_port = port;
 	
-	NOT_BELOW_ZERO(getaddrinfo(addr, port, &_hints, &addrinfo));
+	if (getaddrinfo(addr, port, &_hints, &addrinfo) < 0)
+		return (-1);
 	
 	this->fd.fd = socket(
 		this->addrinfo->ai_family,
@@ -68,10 +69,14 @@ int Socket::open(const char *addr, const char *port, int type)
 		this->addrinfo->ai_protocol
 	);
 	
-	NOT_BELOW_ZERO(this->fd.fd);
+	if (this->fd.fd < 0)
+		return (-1);
 	
 	if (type == SERVER)
-		NOT_BELOW_ZERO(fcntl(this->fd.fd, F_SETFL, O_NONBLOCK));
+	{
+		if (fcntl(this->fd.fd, F_SETFL, O_NONBLOCK) < 0)
+			return (-1);
+	}
 
 	return (this->fd.fd);
 }
