@@ -43,9 +43,9 @@ class TcpServer : public Socket
 		int		openup(const char *host, const char *port);
 		void	loop(void);
 
-		void	on_handshake_hook(handshakefunc_t func);
-		void	on_message_hook(messagefunc_t func);
-		void	on_disconnect_hook(disconnectfunc_t func);
+		void	setHandshakeHook(handshakefunc_t func);
+		void	setMessageHook(messagefunc_t func);
+		void	setDisconnectHook(disconnectfunc_t func);
 
 	private:
 		handshakefunc_t			m_onHanshake;

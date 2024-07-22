@@ -203,6 +203,6 @@ int TcpServer::removeClientFromList(int fd)
 	return (1);
 }
 
-void	TcpServer::on_handshake_hook(handshakefunc_t func) { this->m_onHanshake = func; }
-void	TcpServer::on_message_hook(messagefunc_t func) { this->m_onMessage = func; }
-void	TcpServer::on_disconnect_hook(disconnectfunc_t func) { this->m_onDisconnect = func; }
+void	TcpServer::setHandshakeHook(handshakefunc_t func) { this->m_onHanshake = func; }
+void	TcpServer::setMessageHook(messagefunc_t func) { this->m_onMessage = func; }
+void	TcpServer::setDisconnectHook(disconnectfunc_t func) { this->m_onDisconnect = func; }
