@@ -39,8 +39,6 @@
 // Reset color
 # define RESET "\x1B[0m"
 
-#define NOT_BELOW_ZERO(x) { if (x < 0) return (-1); }
-
 #ifdef DEBUG
  #define LOG_DEBUG(x) { std::cout << BOLD_MAGENTA << "[" << __func__ << "] " << RESET << x << RESET << std::endl; }
 #else

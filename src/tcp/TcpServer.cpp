@@ -2,12 +2,11 @@
 #include "Utils.hpp"
 
 #include <fstream>
-#
 
 /**
  * @brief Default constructor for the TcpServer class.
  */
-TcpServer::TcpServer() : _pollfds(0), _clients()
+TcpServer::TcpServer() : _pollfds(0), _clients(0)
 { }
 
 /**
@@ -89,7 +88,6 @@ int TcpServer::openup(const char *host, const char *port)
  */
 void TcpServer::loop(void)
 {
-	std::cout << BOLD_MAGENTA << "Ready to accept connections." << RESET << std::endl;
 	int	x;
 
 	while (this->isConnected())
@@ -168,8 +166,11 @@ inline int TcpServer::handleClientConnection()
 	socklen_t client_addrlen = sizeof(client_addrin);
 	int32_t clientFd = accept(this->fd.fd, (sockaddr *)&client_addrin, &client_addrlen);
 
-	NOT_BELOW_ZERO(clientFd);
-	NOT_BELOW_ZERO(fcntl(clientFd, F_SETFL, O_NONBLOCK));
+	if (clientFd < 2)
+		return (-1);
+
+	if (fcntl(clientFd, F_SETFL, O_NONBLOCK) < 0)
+		return (-1);
 
 	TcpClient *client = new TcpClient(clientFd, client_addrin);
 
@@ -179,7 +180,7 @@ inline int TcpServer::handleClientConnection()
 		std::cout << BOLD_MAGENTA << "(" << RESET << this->_pollfds.size() - 1 << BOLD_MAGENTA << ") " << \
 			client->getHost() << RESET << " joined the server" << std::endl;
 	}
-	this->m_onHanshake(client, "no_data_provided_yet!"); //TODO Wait for the first message from the user.
+	this->m_onHanshake(client);
 	return (1);
 }
 
@@ -189,26 +190,19 @@ int TcpServer::removeClientFromList(int fd)
 
 	for (std::vector<pollfd>::iterator begin = _pollfds.begin(); begin != this->_pollfds.end(); begin++)
 	{
-		if (begin->fd == fd)
-		{
-			LOG_DEBUG("Removed socket : " << begin->fd << " from the pollers list");
-			this->_pollfds.erase(begin);
-			break;
-		}
+		if (begin->fd != fd)
+			continue;
+		this->_pollfds.erase(begin);	
+		break;
 	}
 
 	this->_clients.erase(fd);
 	LOG_DEBUG(client->getHost() << " left the server");
 	delete client;
+	this->m_onDisconnect(fd);
 	return (1);
 }
 
-void	TcpServer::on_message_hook(messagefunc_t func)
-{
-	this->m_onMessage = func;
-}
-
-void	TcpServer::on_handshake_hook(handshakefunc_t func)
-{
-	this->m_onHanshake = func;
-}
+void	TcpServer::on_handshake_hook(handshakefunc_t func) { this->m_onHanshake = func; }
+void	TcpServer::on_message_hook(messagefunc_t func) { this->m_onMessage = func; }
+void	TcpServer::on_disconnect_hook(disconnectfunc_t func) { this->m_onDisconnect = func; }

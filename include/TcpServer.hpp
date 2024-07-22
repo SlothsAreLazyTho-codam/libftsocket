@@ -21,8 +21,9 @@
 
 #define POLL_TIMEOUT 100
 
-typedef	void (*handshakefunc_t)(TcpClient *, const std::string &);
+typedef	void (*handshakefunc_t)(TcpClient *);
 typedef	void (*messagefunc_t)(TcpClient *, const std::string &);
+typedef	void (*disconnectfunc_t)(int fd);
 
 class TcpServer : public Socket
 {
@@ -44,8 +45,10 @@ class TcpServer : public Socket
 
 		void	on_handshake_hook(handshakefunc_t func);
 		void	on_message_hook(messagefunc_t func);
+		void	on_disconnect_hook(disconnectfunc_t func);
 
 	private:
-		handshakefunc_t	m_onHanshake;
-		messagefunc_t	m_onMessage;
+		handshakefunc_t			m_onHanshake;
+		messagefunc_t			m_onMessage;
+		disconnectfunc_t		m_onDisconnect;
 };
