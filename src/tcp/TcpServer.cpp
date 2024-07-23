@@ -71,7 +71,7 @@ int TcpServer::openup(const char *host, const char *port)
 #ifdef DEBUG
 	print_socket_information(*this);
 #else
-	std::cout << "(!) Ready to accept connections";
+	std::cout << "(!) Ready to accept connections" << std::endl;
 #endif
 
 	return (1);
