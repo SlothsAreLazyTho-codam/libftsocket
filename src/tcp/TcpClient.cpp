@@ -1,5 +1,4 @@
-#include "TcpClient.hpp"
-#include "Utils.hpp"
+#include "tcp/TcpClient.hpp"
 
 #define MAX_BUFFER 1024
 
@@ -14,7 +13,8 @@ TcpClient::TcpClient(int fd, sockaddr_in addr)
 	this->fd.events = POLLIN | POLLOUT;
 	this->fd.revents = 0;
 
-	this->_ip = Utils::addrintoipv4(addr.sin_addr);
+	//this->_ip = Utils::addrintoipv4(addr.sin_addr);
+	this->_ip = 
 	this->_port = addr.sin_port;
 	this->setConnected(true);
 }

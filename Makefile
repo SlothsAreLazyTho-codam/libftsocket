@@ -6,14 +6,14 @@
 #    By: macbook <macbook@student.codam.nl>           +#+                      #
 #                                                    +#+                       #
 #    Created: 2024/04/18 03:23:25 by macbook       #+#    #+#                  #
-#    Updated: 2024/05/23 19:44:23 by macbook       ########   odam.nl          #
+#    Updated: 2024/08/13 14:54:42 by cbijman       ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
 # Compiler Rules
 NAME=libftsocket.a
-CXX=clang++ --std=c++11 -g
-CXX_FLAGS=-I./include
+CXX=clang++ --std=c++11
+CXX_FLAGS=-I./include/
 
 # Colours
 RESET		= \033[m
@@ -33,8 +33,7 @@ DEP_FOLDER=$(BIN_FOLDER)/deps
 # File structure
 FILES =	Socket \
 		TcpClient \
-		TcpServer \
-		Utils
+		TcpServer 
 
 vpath %.cpp $(SRC_FOLDER) \
 			$(SRC_FOLDER)/tcp \
@@ -68,9 +67,6 @@ fclean: clean
 	$(RM) $(NAME)
 
 re: clean all
-
-build: CXX_FLAGS += -Wall -Wextra -Werror -O3
-build: re
 
 debug: CXX += -fsanitize=address -DDEBUG -DBOLD_MAGENTA="\"$(BOLD_RED)\""
 debug: fclean $(OBJS)

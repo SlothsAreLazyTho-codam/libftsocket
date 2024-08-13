@@ -1,7 +1,8 @@
 #pragma once
 
+#include "tcp/TcpClient.hpp"
+
 #include <Socket.hpp>
-#include <TcpClient.hpp>
 #include <macros.h>
 
 #include <algorithm>

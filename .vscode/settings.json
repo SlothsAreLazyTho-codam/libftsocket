@@ -1,0 +1,24 @@
+{
+	"files.exclude": {
+		"**/.git": true,
+		"**/.svn": true,
+		"**/.hg": true,
+		"**/CVS": true,
+		"**/.DS_Store": true
+	},
+	"editor.tabSize": 4,
+	"editor.formatOnSave": true,
+	"C_Cpp.default.includePath": [
+		"${workspaceFolder}/include",
+		"${default}"
+	],
+	"C_Cpp.default.cppStandard": "c++11",
+	"C_Cpp.default.cStandard": "c11",
+	"C_Cpp.default.intelliSenseMode": "clang-x64",
+	"C_Cpp.default.compilerPath": "/usr/bin/clang",
+	"C_Cpp.default.compilerArgs": [
+		"-Wall",
+		"-Wextra",
+		"-Werror"
+	]
+}

@@ -92,7 +92,6 @@ void Socket::close(void)
 	if (this->isClosed())
 		return;
 	this->setConnected(false);
-	::close(this->fd.fd);
 }
 
 void Socket::setConnected(int open)
