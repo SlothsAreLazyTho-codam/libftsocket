@@ -69,6 +69,8 @@ int TcpServer::openup(const char *host, const char *port)
 	if (listen(this->fd.fd, 5) < 0)
 		return (-1);
 
+	this->fd.events = POLLIN | POLLOUT | POLLHUP;
+
 	this->_pollfds.push_back(this->fd);
 	this->setConnected(true);
 
@@ -105,25 +107,27 @@ void TcpServer::loop(void)
 					pollfd target = this->_pollfds[i];
 						if (target.revents & POLLHUP ||
 							target.revents & POLLERR ||
-							target.revents & POLLNVAL) {
+							target.revents & POLLNVAL ||
+							target.revents & POLLOUT) {
 							this->removeClientFromList(target.fd);
 						}
-						else if (target.revents & POLLIN) {
+						else if (target.revents & POLLIN)
+						{
 							if (target.fd == this->fd.fd)
 								handleClientConnection();
 							else
 								handleClientEvent(this->_clients.at(target.fd));
 						}
-						else if (target.revents & POLLOUT) {
-							TcpClient *client = this->_clients.at(target.fd);
-							x = send(target.fd, client->getBuffer().c_str(),
-									 client->getBufferLength(), 0);
-								if (x < 0) {
-									this->removeClientFromList(target.fd);
-									break;
-								}
-							client->resetBuffer();
-						}
+						//else if (target.revents & POLLOUT) {
+						//	TcpClient *client = this->_clients.at(target.fd);
+						//	x = send(target.fd, client->getBuffer().c_str(),
+						//			 client->getBufferLength(), 0);
+						//		if (x < 0) {
+						//			this->removeClientFromList(target.fd);
+						//			break;
+						//		}
+						//	client->resetBuffer();
+						//}
 				}
 		}
 }
@@ -131,24 +135,23 @@ void TcpServer::loop(void)
 inline void TcpServer::handleClientEvent(TcpClient *client)
 {
 	std::string delimiter = "\n";
-		try {
-			std::string buffer = client->readString();
-
-				if (client->isClosed()) {
-					removeClientFromList(client->getSocket());
-					return;
-				}
-
-			size_t pos = 0;
-				while ((pos = buffer.find(delimiter)) != std::string::npos) {
-					this->onMessage(client, buffer.substr(0, pos));
-					buffer.erase(0, pos + delimiter.length());
-				}
+	try {
+		std::string buffer = client->readString();
+		if (client->isClosed()) {
+			removeClientFromList(client->getSocket());
+			return;
 		}
-		catch (std::invalid_argument &ex) {
-			LOG_DEBUG("Throwing exception, cause: " << ex.what());
-			this->removeClientFromList(client->getSocket());
+		LOG_DEBUG(buffer);
+		size_t pos = 0;
+		while ((pos = buffer.find(delimiter)) != std::string::npos) {
+			this->onMessage(client, buffer.substr(0, pos));
+			buffer.erase(0, pos + delimiter.length());
 		}
+	}
+	catch (std::invalid_argument &ex) {
+		LOG_DEBUG("Throwing exception, cause: " << ex.what()); //TODO Merge into reason why user disconnects.
+		this->removeClientFromList(client->getSocket());
+	}
 }
 
 inline int TcpServer::handleClientConnection()
@@ -181,13 +184,12 @@ int TcpServer::removeClientFromList(int fd)
 {
 	TcpClient *client = this->_clients.at(fd);
 
-		for (std::vector<pollfd>::iterator begin = _pollfds.begin();
-			 begin != this->_pollfds.end(); begin++) {
-			if (begin->fd != fd)
-				continue;
-			this->_pollfds.erase(begin);
-			break;
-		}
+	for (std::vector<pollfd>::iterator begin = _pollfds.begin(); begin != this->_pollfds.end(); begin++) {
+		if (begin->fd != fd)
+			continue;
+		this->_pollfds.erase(begin);
+		break;
+	}
 
 	this->_clients.erase(fd);
 	LOG_DEBUG(client->getHost() << " left the server");

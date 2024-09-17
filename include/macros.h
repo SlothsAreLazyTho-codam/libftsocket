@@ -1,6 +1,6 @@
 #pragma once
 
-#define FTSOCK_VERSION "0.0.1"
+#define FTSOCK_VERSION "1.0.1"
 
 // Colours
 # define BLACK   "\x1B[0;30m"

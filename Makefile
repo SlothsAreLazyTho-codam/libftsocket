@@ -6,7 +6,7 @@
 #    By: macbook <macbook@student.codam.nl>           +#+                      #
 #                                                    +#+                       #
 #    Created: 2024/04/18 03:23:25 by macbook       #+#    #+#                  #
-#    Updated: 2024/08/13 14:54:42 by cbijman       ########   odam.nl          #
+#    Updated: 2024/09/17 14:28:39 by cbijman       ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -64,12 +64,12 @@ clean:
 	$(RM) $(OBJS) $(BIN_FOLDER)
 	
 fclean: clean
-	$(RM) $(NAME)
+	$(RM) $(NAME) ./a.out
 
 re: clean all
 
 debug: CXX += -fsanitize=address -DDEBUG -DBOLD_MAGENTA="\"$(BOLD_RED)\""
-debug: fclean $(OBJS)
+debug: fclean all
 	$(CXX) $(CXX_FLAGS) ./tests/server.cpp $(OBJS)
 	echo "Debug build"
 

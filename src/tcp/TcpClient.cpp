@@ -10,11 +10,11 @@ TcpClient::TcpClient(int fd, sockaddr_in addr)
 {
 	//Set the file descriptor up manually
 	this->fd.fd = fd;
-	this->fd.events = POLLIN | POLLOUT;
+	this->fd.events = POLLIN;
 	this->fd.revents = 0;
 
 	//this->_ip = Utils::addrintoipv4(addr.sin_addr);
-	this->_ip = 
+	this->_ip = std::string("127.0.0.1"); //TODO Fix hostname
 	this->_port = addr.sin_port;
 	this->setConnected(true);
 }
@@ -127,7 +127,6 @@ std::vector<char> TcpClient::read()
 		response.insert(response.end(), buffer, buffer + bytes_read);
 	}
 
-	LOG_DEBUG("Done reading(" << bytes_read << ")");
 	return (response);
 }
 
@@ -143,14 +142,16 @@ std::string TcpClient::readString()
 		std::vector<char> data = read();
 
 		if (data.empty())
+		{
 			throw std::invalid_argument("no data was received by peer");
+		}
 
 		data.push_back(0);
 		return (data.data());
 	}
 	catch (std::exception &ex)
 	{
-		return (std::string());
+		throw std::invalid_argument(ex.what() /* Feels like a crime */);
 	}
 
 	return (nullptr);

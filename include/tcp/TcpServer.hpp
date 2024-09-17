@@ -30,15 +30,16 @@ class TcpServer : public Socket
 
 		inline void	handleClientEvent(TcpClient *client);
 
-		int	handleClientConnection();
-		int	removeClientFromList(int fd);
-
 	public:
 		TcpServer();
 		virtual ~TcpServer();
 
 		int		openup(const char *host, const char *port);
 		void	loop(void);
+
+		int	handleClientConnection();
+		int	removeClientFromList(int fd);
+
 
 	protected:
 		virtual void onHandshake(TcpClient *);
