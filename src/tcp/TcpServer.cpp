@@ -76,8 +76,6 @@ int TcpServer::openup(const char *host, const char *port)
 
 #ifdef DEBUG
 	print_socket_information(*this);
-#else
-	std::cout << "(!) Ready to accept connections" << std::endl;
 #endif
 
 	return (1);
@@ -98,38 +96,29 @@ void TcpServer::loop(void)
 {
 	int x;
 
-		while (this->isConnected()) {
-				if (poll(this->_pollfds.data(), this->_pollfds.size(),
-						 POLL_TIMEOUT) < 0) {
-					throw std::runtime_error("poll() failed");
-				}
-				for (size_t i = 0; i < this->_pollfds.size(); i++) {
-					pollfd target = this->_pollfds[i];
-						if (target.revents & POLLHUP ||
-							target.revents & POLLERR ||
-							target.revents & POLLNVAL ||
-							target.revents & POLLOUT) {
-							this->removeClientFromList(target.fd);
-						}
-						else if (target.revents & POLLIN)
-						{
-							if (target.fd == this->fd.fd)
-								handleClientConnection();
-							else
-								handleClientEvent(this->_clients.at(target.fd));
-						}
-						//else if (target.revents & POLLOUT) {
-						//	TcpClient *client = this->_clients.at(target.fd);
-						//	x = send(target.fd, client->getBuffer().c_str(),
-						//			 client->getBufferLength(), 0);
-						//		if (x < 0) {
-						//			this->removeClientFromList(target.fd);
-						//			break;
-						//		}
-						//	client->resetBuffer();
-						//}
-				}
+	while (this->isConnected()) {
+		if (poll(this->_pollfds.data(), this->_pollfds.size(),
+				 POLL_TIMEOUT) < 0) {
+			throw std::runtime_error("poll() failed");
 		}
+		for (size_t i = 0; i < this->_pollfds.size(); i++) {
+			pollfd target = this->_pollfds[i];
+			if (target.revents & POLLHUP ||
+				target.revents & POLLERR ||
+				target.revents & POLLNVAL ||
+				target.revents & POLLOUT) {
+				this->removeClientFromList(target.fd);
+			}
+			else if (target.revents & POLLIN)
+			{
+				if (target.fd == this->fd.fd)
+					handleClientConnection();
+				else
+					handleClientEvent(this->_clients.at(target.fd));
+				printf("%d, %d", target.fd, target.revents);
+			}
+		}
+	}
 }
 
 inline void TcpServer::handleClientEvent(TcpClient *client)
@@ -158,8 +147,7 @@ inline int TcpServer::handleClientConnection()
 {
 	sockaddr_in client_addrin;
 	socklen_t client_addrlen = sizeof(client_addrin);
-	int32_t clientFd =
-		accept(this->fd.fd, (sockaddr *)&client_addrin, &client_addrlen);
+	int32_t clientFd = accept(this->fd.fd, (sockaddr *)&client_addrin, &client_addrlen);
 
 	if (clientFd < 2)
 		return (-1);
@@ -172,8 +160,8 @@ inline int TcpServer::handleClientConnection()
 	this->_pollfds.push_back(client->getFileDescriptor());
 	this->_clients.insert({client->getSocket(), client});
 	{
-		std::cout << BOLD_MAGENTA << "(" << RESET << this->_pollfds.size() - 1
-				  << BOLD_MAGENTA << ") " << client->getHost() << RESET
+		std::cout << BOLD_MAGENTA "(" << RESET << this->_clients.size() - 1
+				  << BOLD_MAGENTA ") " << client->getHost() << RESET
 				  << " joined the server" << std::endl;
 	}
 	this->onHandshake(client);
@@ -182,7 +170,7 @@ inline int TcpServer::handleClientConnection()
 
 int TcpServer::removeClientFromList(int fd)
 {
-	TcpClient *client = this->_clients.at(fd);
+	LOG_DEBUG("Deleting client")
 
 	for (std::vector<pollfd>::iterator begin = _pollfds.begin(); begin != this->_pollfds.end(); begin++) {
 		if (begin->fd != fd)
@@ -191,9 +179,15 @@ int TcpServer::removeClientFromList(int fd)
 		break;
 	}
 
-	this->_clients.erase(fd);
-	LOG_DEBUG(client->getHost() << " left the server");
-	delete client;
+	try {
+		TcpClient *client = this->_clients.at(fd); //Throws exception because (out of range)
+		this->_clients.erase(fd);
+		delete client;
+	}
+	catch (std::exception &ex)
+	{
+		std::cout << ex.what() << std::endl;
+	}
 	this->onDisconnect(fd);
 	return (1);
 }

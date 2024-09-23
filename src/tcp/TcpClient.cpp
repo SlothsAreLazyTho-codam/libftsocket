@@ -77,7 +77,10 @@ void TcpClient::send(std::string buff)
 	if (buff.find("\r\n") == std::string::npos)
 		buff += "\r\n";
 
-	this->_buffer += buff;
+	::send(this->fd.fd,
+			buff.c_str(),
+			buff.length(),
+			MSG_DONTWAIT);
 }
 
 

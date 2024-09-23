@@ -20,7 +20,7 @@
 	#undef POLL_TIMEOUT
 #endif
 
-#define POLL_TIMEOUT 100
+#define POLL_TIMEOUT 0
 
 class TcpServer : public Socket
 {
