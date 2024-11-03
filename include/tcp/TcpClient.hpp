@@ -6,8 +6,8 @@
 class TcpClient : public Socket
 {
 	private:
-		bool		_connected;
-		std::string	_buffer;
+		bool				_connected;
+		std::vector<char>	_buffer;
 
 	public:
 		TcpClient(int fd, sockaddr_in addr);
@@ -16,7 +16,7 @@ class TcpClient : public Socket
 
 		bool connect(std::string address, std::string port);
 
-		void				send(std::string arg);
+		void				send(std::string &arg);
 		std::vector<char>	read();
 		void				close();
 
@@ -26,6 +26,6 @@ class TcpClient : public Socket
 
 	public:
 		void flush();
-		[[nodiscard]] const std::string &getBuffer() const;
+		[[nodiscard]] const std::vector<char> &getBuffer() const;
 		[[nodiscard]] const int getBufferLength() const;
 };

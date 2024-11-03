@@ -8,5 +8,4 @@
 **/*.d
 **/*.a
 
-./tests/client
-./tests/server
+main.cpp

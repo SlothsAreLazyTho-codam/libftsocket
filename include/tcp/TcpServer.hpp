@@ -71,7 +71,7 @@ class TcpServer : public Socket
 		const std::shared_ptr<TClient> addClient(int fd, sockaddr_in addr)
 		{
 			auto client = std::make_shared<TClient>(fd, addr);
-			this->_clients[fd] = client;
+			this->_clients.emplace(fd, client);
 			return client;
 		}
 
@@ -79,7 +79,7 @@ class TcpServer : public Socket
 		void removeClient(int fd)
 		{
 			std::cout << "File descriptor " << fd << "is leaving the poll" << std::endl;
-			//std::erase_if(this->_pollfds, [fd](const pollfd &poll) { return poll.fd == fd; });
+			std::erase_if(this->_pollfds, [fd](const pollfd &poll) { return poll.fd == fd; });
 			this->_clients.erase(fd);
 		}
 
@@ -120,54 +120,52 @@ class TcpServer : public Socket
 				{
 					std::shared_ptr<TcpClient> c = getClient(fd);
 
-					std::cout << c->getFileDescriptor() << " is requestng data" << std::endl;
-
 					if (c == nullptr)
 						return;
 					
 					handleClientMessage(c);
 				}
+				return;
 			}
 
 			if (event & POLLOUT)
 			{
 				std::shared_ptr<TcpClient> c = this->getClient(fd);
 
+				if (c->isClosed())
+					return;
+
 				if (c->getBufferLength() != 0)
 				{
 					send(c->getFileDescriptor(),
-						c->getBuffer().c_str(),
+						c->getBuffer().data(),
 						c->getBufferLength(),
 						0);
 
 					c->flush();
 				}
+
+				return;
 			}
 
 			if (event & POLLHUP || event & POLLERR || event & POLLNVAL) {
 				removeClient(fd);
-			}			
+				return;
+			}
 		}
 
 		inline void handleClientMessage(std::shared_ptr<TcpClient> client)
 		{
-			std::string delimiter = "\r\n";
-
-			std::cout << "[Data] reading from filedescriptor" << client->getFileDescriptor() << std::endl;
-
 			if (client->isClosed())
 				return;
 
-			try {
-				std::vector<char> bytes = client->read();
-				std::string buffer(bytes.data());
+			std::string delimiter = "\r\n";
+			int			pos = 0;
 
-				if (!client->isConnected()) {
-					removeClient(client->getFileDescriptor());
-					return;
-				}
+			try {
+				std::vector<char>	bytes = client->read();
+				std::string			buffer(bytes.data());
 				
-				size_t pos = 0;
 				while ((pos = buffer.find(delimiter)) != std::string::npos) {
 					//this->onMessage(client, buffer.substr(0, pos));
 					std::cout << "[Incoming] " << buffer.substr(0, pos) << std::endl;

@@ -33,7 +33,7 @@ class Socket
 	public:
 		Socket(std::string stack, int fd, sockaddr_in info);
 		Socket(std::string stack, pollfd fd, sockaddr_in info);
-		Socket(std::string stack, const std::string host, const std::string port);
+		Socket(std::string stack, const std::string &host, const std::string &port);
 		virtual ~Socket();
 	
 	public:
