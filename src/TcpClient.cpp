@@ -1,14 +1,14 @@
 #include "tcp/TcpClient.hpp"
 
-TcpClient::TcpClient(int fd, sockaddr_in addr):
-	Socket("client_stack", {fd, POLLIN | POLLOUT | POLLHUP}, addr),
-	_connected(true), _buffer(1024)
-{ }
+TcpClient::TcpClient(int fd, sockaddr_in addr) : Socket("client_stack", {fd, POLLIN | POLLOUT | POLLHUP}, addr),
+												 _connected(true), _buffer(0)
+{
+}
 
-TcpClient::TcpClient(pollfd fd, sockaddr_in addr):
-	Socket("client_stack", fd, addr),
-	_connected(true), _buffer(1024)
-{ }
+TcpClient::TcpClient(pollfd fd, sockaddr_in addr) : Socket("client_stack", fd, addr),
+													_connected(true), _buffer(0)
+{
+}
 
 TcpClient::~TcpClient()
 {
@@ -38,9 +38,9 @@ void TcpClient::send(std::string &arg)
 
 std::vector<char> TcpClient::read()
 {
-	std::vector<char>	response(0);
-	char				buffer[1024];
-	int					bytes_read = 1;
+	std::vector<char> response(0);
+	char buffer[1024];
+	int bytes_read = 1;
 
 	if (this->isClosed())
 	{
