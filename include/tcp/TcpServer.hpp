@@ -126,6 +126,11 @@ protected:
 		return (this->_clients.at(fd));
 	}
 
+	std::map<int, TClient *> &getClients()
+	{
+		return (this->_clients);
+	}
+
 private: /* Class implementations, Gonna be alot of funtions*/
 	/**
 	 * @brief Handles events for a client socket.
