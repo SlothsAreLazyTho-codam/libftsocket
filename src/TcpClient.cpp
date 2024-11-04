@@ -25,7 +25,7 @@ bool TcpClient::connect(std::string address, std::string port)
 }
 
 // I chose to do buffer instead of sending directly because TcpClient#connect doesn't work yet.
-void TcpClient::send(std::string &arg)
+void TcpClient::send(std::string arg)
 {
 	if (!this->isConnected())
 		return;

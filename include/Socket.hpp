@@ -17,31 +17,31 @@
 
 class Socket
 {
-	private:
-		struct addrinfo		_hints;
+private:
+	struct addrinfo _hints;
 
-	protected:
-		const std::string	_host;
-		const std::string	_port;
+protected:
+	const std::string _host;
+	const std::string _port;
 
-	protected:
-		std::string 		_stack;
-		struct addrinfo		*_addrinfo;
-		pollfd				_pollfd;
-	
-	protected:
-		bool open();
+protected:
+	std::string _stack;
+	struct addrinfo *_addrinfo;
+	pollfd _pollfd;
 
-	public:
-		Socket(std::string stack, int fd, sockaddr_in info);
-		Socket(std::string stack, pollfd fd, sockaddr_in info);
-		Socket(std::string stack, const std::string &host, const std::string &port);
-		virtual ~Socket();
-	
-	public:
-		const std::string	&getStack() const;
-		const std::string	&getHost() const;
-		const std::string	&getPort() const;
-		const int			getFileDescriptor() const;
-		pollfd				&getPollFiledescriptor();
+protected:
+	bool open();
+
+public:
+	Socket(std::string stack, int fd, sockaddr_in info);
+	Socket(std::string stack, pollfd fd, sockaddr_in info);
+	Socket(std::string stack, const std::string &host, const std::string &port);
+	virtual ~Socket();
+
+public:
+	const std::string &getStack() const;
+	const std::string &getHost() const;
+	const std::string &getPort() const;
+	const int getFileDescriptor() const;
+	pollfd &getPollFiledescriptor();
 };
