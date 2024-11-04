@@ -36,7 +36,7 @@ class TcpServer : public Socket
 		}
 
 	public:
-		virtual void onConnect(const TClient* client) { (void) client;}
+		virtual void onConnect(const TClient* client) = 0;
 		virtual void onDataReceived(const TClient* client, const std::string &message) { (void) client; (void) message; }
 		virtual void onDisconnect(const TClient* client) { (void) client;}
 

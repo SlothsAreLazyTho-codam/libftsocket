@@ -24,6 +24,7 @@ bool TcpClient::connect(std::string address, std::string port)
 	return (_connected);
 }
 
+// I chose to do buffer instead of sending directly because TcpClient#connect doesn't work yet.
 void TcpClient::send(std::string &arg)
 {
 	if (!this->isConnected())
@@ -35,7 +36,7 @@ void TcpClient::send(std::string &arg)
 	this->_buffer.insert(_buffer.end(), arg.begin(), arg.end());
 }
 
-const std::vector<char> TcpClient::read()
+std::vector<char> TcpClient::read()
 {
 	std::vector<char>	response(0);
 	char				buffer[1024];

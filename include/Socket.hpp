@@ -12,6 +12,8 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
 class Socket
 {
@@ -38,6 +40,7 @@ class Socket
 	
 	public:
 		const std::string	&getStack() const;
+		const std::string	&getHost() const;
 		const std::string	&getPort() const;
 		const int			getFileDescriptor() const;
 		pollfd				&getPollFiledescriptor();

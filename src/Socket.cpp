@@ -12,17 +12,17 @@ Socket::Socket(std::string stack, const std::string &host, const std::string &po
 }
 
 Socket::Socket(std::string stack, int fd, sockaddr_in info) : _stack(stack), _addrinfo(nullptr),
-															  _pollfd({fd, 0, 0})
+															  _pollfd({fd, 0, 0}),
+															  _host(inet_ntoa(info.sin_addr))
 {
 	memset(&_hints, 0, sizeof(addrinfo));
-	/* Get and set address info from sockaddr_in */
 }
 
 Socket::Socket(std::string stack, pollfd fd, sockaddr_in info) : _stack(stack), _addrinfo(nullptr),
-																 _pollfd(fd)
+																 _pollfd(fd),
+																 _host(inet_ntoa(info.sin_addr))
 {
 	memset(&_hints, 0, sizeof(addrinfo));
-	/* Get and set address info from sockaddr_in */
 }
 
 Socket::~Socket()
@@ -66,12 +66,17 @@ const int Socket::getFileDescriptor() const
 	return (this->_pollfd.fd);
 }
 
+const std::string &Socket::getHost() const
+{
+	return (this->_host);
+}
+
 const std::string &Socket::getPort() const
 {
 	return (this->_port);
 }
 
-// Protected functions
+//  * Protected functions * //
 pollfd &Socket::getPollFiledescriptor()
 {
 	return (this->_pollfd);
