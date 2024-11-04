@@ -2,7 +2,7 @@
 
 Socket::Socket(std::string stack, const std::string &host, const std::string &port) : _host(host), _port(port),
 																					  _stack(stack), _addrinfo(nullptr),
-																					  _pollfd({-1, POLLIN, 0})
+																					  _pollfd({-1, POLLIN | POLLOUT | POLLHUP, 0})
 {
 	// Setting hints assuming the socket has not been opened yet
 	memset(&_hints, 0, sizeof(addrinfo));
@@ -31,7 +31,6 @@ Socket::~Socket()
 		::freeaddrinfo(this->_addrinfo);
 	if (this->_pollfd.fd > STDERR_FILENO)
 		::close(this->_pollfd.fd);
-	std::cout << "[Info] Socket is closed" << std::endl;
 }
 
 // Basically opens a socket pipe.

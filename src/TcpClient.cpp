@@ -35,7 +35,7 @@ void TcpClient::send(std::string &arg)
 	this->_buffer.insert(_buffer.end(), arg.begin(), arg.end());
 }
 
-std::vector<char> TcpClient::read()
+const std::vector<char> TcpClient::read()
 {
 	std::vector<char>	response(0);
 	char				buffer[1024];

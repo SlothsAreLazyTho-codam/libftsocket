@@ -17,8 +17,8 @@ class TcpServer : public Socket
 		bool _running;
 
 	private: /* Vectors */
-		std::vector<struct pollfd>				_pollfds;
-		std::map<int, std::shared_ptr<TClient>> _clients;
+		std::vector<struct pollfd>	_pollfds;
+		std::map<int, TClient*>		_clients;
 
 	public:
 		TcpServer(const std::string ip, const std::string port): Socket("server_stack", ip, port),
@@ -35,6 +35,12 @@ class TcpServer : public Socket
 			this->close();
 		}
 
+	public:
+		virtual void onConnect(const TClient* client) { (void) client;}
+		virtual void onDataReceived(const TClient* client, const std::string &message) { (void) client; (void) message; }
+		virtual void onDisconnect(const TClient* client) { (void) client;}
+
+	public:
 		bool start()
 		{
 			int opt = 1;
@@ -54,7 +60,6 @@ class TcpServer : public Socket
 			if (listen(this->_pollfd.fd, 16) < 0)
 				return (false);
 
-			this->_pollfd.events = POLLIN | POLLOUT | POLLHUP;
 			this->_pollfds.push_back(this->_pollfd);
 			this->_running = true;
 			return (_running);
@@ -66,32 +71,7 @@ class TcpServer : public Socket
 				return;
 			this->_running = false;
 		}
-
-	private:
-		const std::shared_ptr<TClient> addClient(int fd, sockaddr_in addr)
-		{
-			auto client = std::make_shared<TClient>(fd, addr);
-			this->_clients.emplace(fd, client);
-			return client;
-		}
-
-		/* Remove the client from polling */
-		void removeClient(int fd)
-		{
-			std::cout << "File descriptor " << fd << "is leaving the poll" << std::endl;
-			std::erase_if(this->_pollfds, [fd](const pollfd &poll) { return poll.fd == fd; });
-			this->_clients.erase(fd);
-		}
-
-		const std::shared_ptr<TClient> getClient(int fd)
-		{
-			if (fd <= STDERR_FILENO)
-				return (nullptr);
-			if (this->_clients.empty())
-				return (nullptr); /* Return nullptr */
-			return (this->_clients.at(fd));
-		}
-
+	
 	public:
 		void run()
 		{
@@ -108,8 +88,56 @@ class TcpServer : public Socket
 		}
 
 		const bool isRunning() const { return (this->_running); }
+
+	protected:
+		/* Add the client to the socket */
+		TClient* addClient(int fd, sockaddr_in addr)
+		{
+			TClient* client = new TClient(fd, addr);
+			this->_clients.emplace(fd, client);
+			return client;
+		}
+
+		/* Remove the client from polling */
+		void removeClient(int fd)
+		{
+			const TClient* client = this->getClient(fd);
+			this->onDisconnect(client);
+			
+			//Remove the client from this point.
+			std::erase_if(this->_pollfds, [fd](const pollfd &poll) { return poll.fd == fd; });
+			this->_clients.erase(fd);
+		}
+
+		TClient* getClient(int fd)
+		{
+			if (fd <= STDERR_FILENO)
+				return (nullptr);
+			if (this->_clients.empty())
+				return (nullptr); /* Return nullptr */
+			return (this->_clients.at(fd));
+		}
 	
 	private: /* Class implementations, Gonna be alot of funtions*/
+
+		/**
+		 * @brief Handles events for a client socket.
+		 *
+		 * This function processes different types of events for a client socket
+		 * identified by its file descriptor. It handles incoming data, outgoing data,
+		 * and error conditions.
+		 *
+		 * @param fd The file descriptor of the client socket.
+		 * @param event The event type, which can be a combination of POLLIN, POLLOUT,
+		 *              POLLHUP, POLLERR, and POLLNVAL.
+		 *
+		 * - If the event is POLLIN, it handles incoming data. If the file descriptor
+		 *   matches the server's file descriptor, it handles a new client connection.
+		 *   Otherwise, it processes the incoming message from the client.
+		 * - If the event is POLLOUT, it handles outgoing data. It sends any buffered
+		 *   data to the client and flushes the buffer.
+		 * - If the event is POLLHUP, POLLERR, or POLLNVAL, it removes the client.
+		 */
 		inline void	handleClientEvent(int fd, short event)
 		{
 			if (event & POLLIN)
@@ -118,19 +146,19 @@ class TcpServer : public Socket
 					handleClientConnection();
 				else
 				{
-					std::shared_ptr<TcpClient> c = getClient(fd);
+					TcpClient* client = getClient(fd);
 
-					if (c == nullptr)
+					if (client == nullptr)
 						return;
 					
-					handleClientMessage(c);
+					handleClientMessage(client);
 				}
 				return;
 			}
 
 			if (event & POLLOUT)
 			{
-				std::shared_ptr<TcpClient> c = this->getClient(fd);
+				TcpClient* c = this->getClient(fd);
 
 				if (c->isClosed())
 					return;
@@ -154,21 +182,35 @@ class TcpServer : public Socket
 			}
 		}
 
-		inline void handleClientMessage(std::shared_ptr<TcpClient> client)
+		/**
+		 * @brief Handles incoming messages from a connected TCP client.
+		 * 
+		 * This function reads data from the specified TCP client, processes the data
+		 * to extract complete messages based on a delimiter, and handles the messages.
+		 * If the client is closed or an exception occurs during reading, the client
+		 * is removed.
+		 * 
+		 * @param client A shared pointer to the TcpClient object representing the connected client.
+		 */
+		inline void handleClientMessage(TcpClient* client)
 		{
-			if (client->isClosed())
-				return;
-
 			std::string delimiter = "\r\n";
 			int			pos = 0;
 
 			try {
 				std::vector<char>	bytes = client->read();
 				std::string			buffer(bytes.data());
+
+				if (client->isClosed())
+				{
+					removeClient(client->getFileDescriptor());
+					return;
+				}
 				
+				const TClient *baseClient = this->getClient(client->getFileDescriptor());
+
 				while ((pos = buffer.find(delimiter)) != std::string::npos) {
-					//this->onMessage(client, buffer.substr(0, pos));
-					std::cout << "[Incoming] " << buffer.substr(0, pos) << std::endl;
+					this->onDataReceived(baseClient, buffer.substr(0, pos));
 					buffer.erase(0, pos + delimiter.length());
 				}
 			}
@@ -177,6 +219,16 @@ class TcpServer : public Socket
 			}
 		}
 
+		/**
+		 * @brief Handles an incoming client connection.
+		 *
+		 * This function accepts a new client connection on the server's file descriptor,
+		 * sets the client socket to non-blocking mode, and adds the client to the list
+		 * of managed clients.
+		 *
+		 * @return true if the client connection was successfully handled and added; 
+		 *         false otherwise.
+		 */
 		inline bool handleClientConnection()
 		{
 			sockaddr_in client_addrin;
@@ -191,8 +243,12 @@ class TcpServer : public Socket
 			if (fcntl(clientFd, F_SETFL, O_NONBLOCK) < 0)
 				return (false);
 
-			std::shared_ptr<TcpClient> client = addClient(clientFd, client_addrin);
-			this->_pollfds.push_back(client->getPollFiledescriptor());
+			TClient* client = addClient(clientFd, client_addrin);
+			this->_pollfds.push_back(
+				static_cast<TcpClient*>(client)->getPollFiledescriptor()
+			);
+			this->onConnect(client);
 			return (true);
 		}
+
 };

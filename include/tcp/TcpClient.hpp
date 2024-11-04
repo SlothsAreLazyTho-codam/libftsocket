@@ -25,7 +25,9 @@ class TcpClient : public Socket
 		const bool isClosed() const;
 
 	public:
+		/* Flushes the buffer */
 		void flush();
+
 		[[nodiscard]] const std::vector<char> &getBuffer() const;
 		[[nodiscard]] const int getBufferLength() const;
 };
