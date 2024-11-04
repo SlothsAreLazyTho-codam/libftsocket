@@ -1,14 +1,14 @@
 # LibSocket
-A library made for my team project 'ft_irc'. The library aims to good functionality and simple synchronized tasks in C++20
+A library made for my team project 'ft_irc'. The library aims to good functionality and simple tasks in C++20
 
 # Installation
-Make the project by using 'make', Include the library in the compiler as follow
+Make the project by using 'make', Include the library in your project as follow
 ```sh
 c++ --std=c++20 Server.cpp Client.cpp main.cpp -Llibftsocket -lsocket
 ```
 
 # Example
-Server.hpp
+Server.hpp (refer back to tcp/TcpServer.hpp for the virtual functions)
 ```cpp
 #pragma once
 #include "tcp/TcpServer.hpp"
@@ -24,6 +24,21 @@ class Server : protected TcpServer<Client>
 
         ~Server()
         {}
+
+        void Server::onConnect(const Client *client)
+        {
+            std::cout << client->getHost() << " connected to the server succesfully" << std::endl;
+        }
+
+        void Server::onDataReceived(const Client *client, const std::string &message)
+        {
+            std::cout << client->getHost() << ": " << message << std::endl;
+        }
+
+        void Server::onDisconnect(const Client *client)
+        {
+            std::cout << client->getHost() << " left the server" << std::endl;
+        }
 };
 ```
 
@@ -43,3 +58,9 @@ class Client : protected TcpClient
         { }
 };
 ```
+
+# Report
+Please issue an problem or make a PR! Im happy to receive feedback
+
+# Contact
+Please refer back to my GitHub profile page for active connections!
